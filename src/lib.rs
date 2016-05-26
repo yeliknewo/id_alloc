@@ -1,6 +1,8 @@
 extern crate num;
 
-pub trait Id :  num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy {
+use std::hash::Hash;
+
+pub trait Id :  num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy + Hash {
 }
 
 #[derive(Eq, PartialEq)]
