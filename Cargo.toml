@@ -1,6 +1,6 @@
 [package]
 name = "id_alloc"
-version = "0.4.2"
+version = "0.4.3"
 authors = ["Kiley Owen <yelikdev@gmail.com>"]
 
 [dependencies]

@@ -1,19 +1,18 @@
 extern crate num;
 
+pub use num::*;
+
 use std::hash::Hash;
 
-pub trait IdTrait :  num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy + Hash {
-}
-
 #[derive(Eq, PartialEq)]
-pub struct Node<T: IdTrait> {
+pub struct Node<T: num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy + Hash> {
     bot: T,
     top: T,
     left: Option<Box<Node<T>>>,
     right: Option<Box<Node<T>>>,
 }
 
-impl<T: IdTrait> Node<T> {
+impl<T: num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy + Hash> Node<T> {
     fn new(id: T) -> Node<T> {
         Node {
             bot: id,
