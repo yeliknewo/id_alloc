@@ -1,65 +1,15 @@
-#[test]
-fn alloc_1() {
-    let mut node = Node::new_all();
-    assert!(node.alloc() == Some(0));
-}
-
-#[test]
-fn alloc_2() {
-    let mut node = Node::new_all();
-    assert!(node.alloc() == Some(0));
-    assert!(node.alloc() == Some(1));
-}
-
-#[test]
-fn alloc_3() {
-    let mut node = Node::new_all();
-    assert!(node.alloc() == Some(0));
-    assert!(node.alloc() == Some(1));
-    assert!(node.alloc() == Some(2));
-}
-
-#[test]
-fn dealloc_1() {
-    let mut node = Node::new_all();
-    assert!(node.alloc() == Some(0));
-    node.dealloc(0);
-    assert!(node.alloc() == Some(0));
-}
-
-#[test]
-fn dealloc_2() {
-    let mut node = Node::new_all();
-    assert!(node.alloc() == Some(0));
-    assert!(node.alloc() == Some(1));
-    node.dealloc(0);
-    assert!(node.alloc() == Some(0));
-}
-
-#[test]
-fn dealloc_3() {
-    let mut node = Node::new_all();
-    assert!(node.alloc() == Some(0));
-    assert!(node.alloc() == Some(1));
-    node.dealloc(1);
-    assert!(node.alloc() == Some(1));
-    node.dealloc(0);
-    assert!(node.alloc() == Some(0));
-}
-
-type Id = u64;
+extern crate num;
 
 #[derive(Eq, PartialEq)]
-struct Node {
-    bot: Id,
-    top: Id,
-
-    left: Option<Box<Node>>,
-    right: Option<Box<Node>>,
+pub struct Node<T: num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy> {
+    bot: T,
+    top: T,
+    left: Option<Box<Node<T>>>,
+    right: Option<Box<Node<T>>>,
 }
 
-impl Node {
-    fn new(id: Id) -> Node {
+impl<T: num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy> Node<T> {
+    fn new(id: T) -> Node<T> {
         Node {
             bot: id,
             top: id,
@@ -68,17 +18,17 @@ impl Node {
         }
     }
 
-    fn new_all() -> Node {
+    pub fn new_all() -> Node<T> {
         Node {
-            bot: Id::min_value(),
-            top: Id::max_value(),
+            bot: T::min_value(),
+            top: T::max_value(),
 
             left: None,
             right: None,
         }
     }
 
-    fn alloc(&mut self) -> Option<Id> {
+    pub fn alloc(&mut self) -> Option<T> {
         if let Some(lonely) = self.find_lonely() {
             Some(lonely)
         } else if let Some(leaf) = self.find_leaf(true) {
@@ -88,17 +38,17 @@ impl Node {
         }
     }
 
-    fn dealloc(&mut self, id: Id) {
+    pub fn dealloc(&mut self, id: T) {
         assert!(id < self.bot || id > self.top);
         if {
-            match self.bot.checked_sub(1) {
+            match self.bot.checked_sub(&T::one()) {
                 Some(temp) => temp == id,
                 None => false,
             }
         } {
             self.bot = self.compact_left(id);
         } else if {
-            match self.bot.checked_add(1) {
+            match self.bot.checked_add(&T::one()) {
                 Some(temp) => temp == id,
                 None => false,
             }
@@ -121,9 +71,9 @@ impl Node {
         }
     }
 
-    fn compact_left(&mut self, id: Id) -> Id {
+    fn compact_left(&mut self, id: T) -> T {
         if {
-            match id.checked_sub(1) {
+            match id.checked_sub(&T::one()) {
                 Some(temp) => temp == self.top,
                 None => false,
             }
@@ -136,9 +86,9 @@ impl Node {
         }
     }
 
-    fn compact_right(&mut self, id: Id) -> Id {
+    fn compact_right(&mut self, id: T) -> T {
         if {
-            match id.checked_add(1) {
+            match id.checked_add(&T::one()) {
                 Some(temp) => temp == self.bot,
                 None => false,
             }
@@ -151,7 +101,7 @@ impl Node {
         }
     }
 
-    fn find_lonely(&mut self) -> Option<Id> {
+    fn find_lonely(&mut self) -> Option<T> {
         if self.left.is_none() && self.right.is_none() {
             if self.bot == self.top {
                 return Some(self.bot);
@@ -167,15 +117,15 @@ impl Node {
         }
     }
 
-    fn find_leaf(&mut self, right: bool) -> Option<Id> {
+    fn find_leaf(&mut self, right: bool) -> Option<T> {
         if self.left.is_none() && self.right.is_none() {
             if right {
                 let value = self.bot;
-                self.bot += 1;
+                self.bot = self.bot + T::one();
                 Some(value)
             } else {
                 let value = self.top;
-                self.top -= 1;
+                self.top = self.bot - T::one();
                 Some(value)
             }
         } else if self.left.is_some() {
