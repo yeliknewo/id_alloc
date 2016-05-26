@@ -27,6 +27,26 @@ fn dealloc_1() {
     assert!(node.alloc() == Some(0));
 }
 
+#[test]
+fn dealloc_2() {
+    let mut node = Node::new_all();
+    assert!(node.alloc() == Some(0));
+    assert!(node.alloc() == Some(1));
+    node.dealloc(0);
+    assert!(node.alloc() == Some(0));
+}
+
+#[test]
+fn dealloc_3() {
+    let mut node = Node::new_all();
+    assert!(node.alloc() == Some(0));
+    assert!(node.alloc() == Some(1));
+    node.dealloc(1);
+    assert!(node.alloc() == Some(1));
+    node.dealloc(0);
+    assert!(node.alloc() == Some(0));
+}
+
 type Id = u64;
 
 #[derive(Eq, PartialEq)]
@@ -70,9 +90,19 @@ impl Node {
 
     fn dealloc(&mut self, id: Id) {
         assert!(id < self.bot || id > self.top);
-        if id == self.bot.wrapping_sub(1) {
+        if {
+            match self.bot.checked_sub(1) {
+                Some(temp) => temp == id,
+                None => false,
+            }
+        } {
             self.bot = self.compact_left(id);
-        } else if id == self.bot.wrapping_add(1) {
+        } else if {
+            match self.bot.checked_add(1) {
+                Some(temp) => temp == id,
+                None => false,
+            }
+        } {
             self.top = self.compact_right(id);
         } else if id < self.bot {
             if self.left.is_none() {
@@ -92,7 +122,12 @@ impl Node {
     }
 
     fn compact_left(&mut self, id: Id) -> Id {
-        if self.top == id.wrapping_sub(1) {
+        if {
+            match id.checked_sub(1) {
+                Some(temp) => temp == self.top,
+                None => false,
+            }
+        } {
             self.bot
         } else if self.right.is_some() {
             self.right.as_mut().unwrap().compact_left(id)
@@ -102,7 +137,12 @@ impl Node {
     }
 
     fn compact_right(&mut self, id: Id) -> Id {
-        if self.bot == id.wrapping_add(1) {
+        if {
+            match id.checked_add(1) {
+                Some(temp) => temp == self.bot,
+                None => false,
+            }
+        } {
             self.top
         } else if self.left.is_some() {
             self.left.as_mut().unwrap().compact_right(id)
