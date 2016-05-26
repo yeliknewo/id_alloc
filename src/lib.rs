@@ -1,14 +1,17 @@
 extern crate num;
 
+pub trait Id :  num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy {
+}
+
 #[derive(Eq, PartialEq)]
-pub struct Node<T: num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy> {
+pub struct Node<T: Id> {
     bot: T,
     top: T,
     left: Option<Box<Node<T>>>,
     right: Option<Box<Node<T>>>,
 }
 
-impl<T: num::Num + num::Bounded + Ord + num::CheckedAdd + num::CheckedSub + num::One + Copy> Node<T> {
+impl<T: Id> Node<T> {
     fn new(id: T) -> Node<T> {
         Node {
             bot: id,
